@@ -420,6 +420,70 @@ class EliteDashboard {
         this.materials.chassis = { base: baseMaterial, bezel: bezelMaterial, leather: leatherMaterial };
     }
     
+    createRevenueDisplays() {
+        // Create displays exactly like RANK: 03 for each revenue target
+        const targets = [
+            { text: '25K', pos: [-2, 1, 0], color: '#D4AF37' },
+            { text: '50K', pos: [0, 1, 0], color: '#D4AF37' },
+            { text: '75K', pos: [2, 1, 0], color: '#D4AF37' },
+            { text: '100K', pos: [0, -1, 0], color: '#ff4444' }
+        ];
+        
+        targets.forEach(target => {
+            const targetGroup = new THREE.Group();
+            
+            // Housing (same as odometer)
+            const housingGeometry = new THREE.BoxGeometry(1.2, 0.4, 0.3);
+            const housingMaterial = new THREE.MeshPhysicalMaterial({
+                color: 0x1a1a1a,
+                metalness: 0.8,
+                roughness: 0.2
+            });
+            
+            const housing = new THREE.Mesh(housingGeometry, housingMaterial);
+            targetGroup.add(housing);
+            
+            // Display background (same as odometer)
+            const displayGeometry = new THREE.PlaneGeometry(1.0, 0.3);
+            const displayMaterial = new THREE.MeshBasicMaterial({
+                color: 0x001100,
+                transparent: true,
+                opacity: 0.9
+            });
+            
+            const display = new THREE.Mesh(displayGeometry, displayMaterial);
+            display.position.z = 0.16;
+            targetGroup.add(display);
+            
+            // Text display (EXACT same method as RANK: 03)
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.width = 256;
+            canvas.height = 64;
+            
+            context.fillStyle = target.color;
+            context.font = '24px Courier New';
+            context.textAlign = 'center';
+            context.fillText(target.text, 128, 40);
+            
+            const textTexture = new THREE.CanvasTexture(canvas);
+            const textMaterial = new THREE.MeshBasicMaterial({ 
+                map: textTexture,
+                transparent: true 
+            });
+            
+            const textMesh = new THREE.Mesh(
+                new THREE.PlaneGeometry(0.8, 0.2),
+                textMaterial
+            );
+            textMesh.position.z = 0.17;
+            targetGroup.add(textMesh);
+            
+            targetGroup.position.set(target.pos[0], target.pos[1], target.pos[2]);
+            this.scene.add(targetGroup);
+        });
+    }
+    
     createHTMLNumbers() {
         // Create HTML overlay numbers that are DEFINITELY visible
         const overlay = document.createElement('div');
@@ -550,26 +614,11 @@ class EliteDashboard {
         titleBg.position.set(0, 0, 2.5);
         
         chronometerGroup.position.set(0, 0, 0);
-        // CREATE MASSIVE NUMBERS WITH DOM ELEMENTS THAT DEFINITELY WORK
-        this.createHTMLNumbers();
+        // Create revenue displays in the EXACT same style as RANK: 03
+        this.createRevenueDisplays();
         
-        // Also add GIANT CUBES that are impossible to miss
-        const giantCubes = [
-            { color: 0xff0000, pos: [-4, 2, 0] }, // RED
-            { color: 0x00ff00, pos: [-2, 2, 0] }, // GREEN  
-            { color: 0x0000ff, pos: [0, 2, 0] },  // BLUE
-            { color: 0xffff00, pos: [2, 2, 0] },  // YELLOW
-            { color: 0xff00ff, pos: [4, 2, 0] }   // MAGENTA
-        ];
-        
-        giantCubes.forEach(cube => {
-            const mesh = new THREE.Mesh(
-                new THREE.BoxGeometry(1, 1, 1),
-                new THREE.MeshBasicMaterial({ color: cube.color })
-            );
-            mesh.position.set(cube.pos[0], cube.pos[1], cube.pos[2]);
-            this.scene.add(mesh);
-        });
+        // Remove HTML overlay since you want the RANK: 03 style
+        // this.createHTMLNumbers();
         
         this.scene.add(chronometerGroup);
         this.scene.add(titleBg);
