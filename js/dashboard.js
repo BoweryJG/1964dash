@@ -3,8 +3,6 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
-import { FilmShader } from 'three/addons/shaders/FilmShader.js';
-import { VignetteShader } from 'three/addons/shaders/VignetteShader.js';
 
 class LuxuryMaterials {
     constructor() {
@@ -769,32 +767,116 @@ class EliteDashboard {
     }
     
     setupPostProcessing() {
-        this.composer = new EffectComposer(this.renderer);
-        
-        const renderPass = new RenderPass(this.scene, this.camera);
-        this.composer.addPass(renderPass);
-        
-        const bloomPass = new UnrealBloomPass(
-            new THREE.Vector2(window.innerWidth, window.innerHeight),
-            0.5,
-            0.4,
-            0.85
-        );
-        this.composer.addPass(bloomPass);
-        
-        const filmPass = new ShaderPass(FilmShader);
-        filmPass.uniforms.nIntensity.value = 0.15;
-        filmPass.uniforms.sIntensity.value = 0.1;
-        filmPass.uniforms.sCount.value = 512;
-        filmPass.uniforms.grayscale.value = 0;
-        this.composer.addPass(filmPass);
-        
-        const vignettePass = new ShaderPass(VignetteShader);
-        vignettePass.uniforms.offset.value = 0.5;
-        vignettePass.uniforms.darkness.value = 0.8;
-        this.composer.addPass(vignettePass);
-        
-        vignettePass.renderToScreen = true;
+        try {
+            this.composer = new EffectComposer(this.renderer);
+            
+            const renderPass = new RenderPass(this.scene, this.camera);
+            this.composer.addPass(renderPass);
+            
+            const bloomPass = new UnrealBloomPass(
+                new THREE.Vector2(window.innerWidth, window.innerHeight),
+                0.5,
+                0.4,
+                0.85
+            );
+            this.composer.addPass(bloomPass);
+            
+            // Create custom film grain shader
+            const filmShader = {
+                uniforms: {
+                    tDiffuse: { value: null },
+                    time: { value: 0 },
+                    nIntensity: { value: 0.15 },
+                    sIntensity: { value: 0.1 },
+                    sCount: { value: 512 },
+                    grayscale: { value: 0 }
+                },
+                vertexShader: `
+                    varying vec2 vUv;
+                    void main() {
+                        vUv = uv;
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    uniform sampler2D tDiffuse;
+                    uniform float time;
+                    uniform float nIntensity;
+                    uniform float sIntensity;
+                    uniform float sCount;
+                    uniform bool grayscale;
+                    varying vec2 vUv;
+                    
+                    float random(vec2 n) {
+                        return fract(sin(dot(n, vec2(12.9898, 4.1414))) * 43758.5453);
+                    }
+                    
+                    void main() {
+                        vec4 color = texture2D(tDiffuse, vUv);
+                        
+                        // Add film grain
+                        float dx = random(vUv + time);
+                        vec3 cResult = color.rgb + color.rgb * clamp(0.1 + dx, 0.0, 1.0);
+                        
+                        // Add scanlines
+                        vec2 sc = vec2(sin(vUv.y * sCount), cos(vUv.y * sCount));
+                        cResult += color.rgb * vec3(sc.x, sc.y, sc.x) * sIntensity;
+                        
+                        cResult = color.rgb + clamp(nIntensity, 0.0, 1.0) * (cResult - color.rgb);
+                        
+                        if (grayscale) {
+                            cResult = vec3(cResult.r * 0.3 + cResult.g * 0.59 + cResult.b * 0.11);
+                        }
+                        
+                        gl_FragColor = vec4(cResult, color.a);
+                    }
+                `
+            };
+            
+            const filmPass = new ShaderPass(filmShader);
+            this.composer.addPass(filmPass);
+            
+            // Create custom vignette shader
+            const vignetteShader = {
+                uniforms: {
+                    tDiffuse: { value: null },
+                    offset: { value: 0.5 },
+                    darkness: { value: 0.8 }
+                },
+                vertexShader: `
+                    varying vec2 vUv;
+                    void main() {
+                        vUv = uv;
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    uniform sampler2D tDiffuse;
+                    uniform float offset;
+                    uniform float darkness;
+                    varying vec2 vUv;
+                    
+                    void main() {
+                        vec4 color = texture2D(tDiffuse, vUv);
+                        vec2 uv = (vUv - vec2(0.5)) * vec2(offset);
+                        gl_FragColor = vec4(mix(color.rgb, vec3(1.0 - darkness), dot(uv, uv)), color.a);
+                    }
+                `
+            };
+            
+            const vignettePass = new ShaderPass(vignetteShader);
+            this.composer.addPass(vignettePass);
+            
+            // Store shader passes for animation
+            this.shaderPasses = {
+                film: filmPass,
+                vignette: vignettePass
+            };
+            
+        } catch (error) {
+            console.warn('Post-processing setup failed, falling back to basic rendering:', error);
+            this.composer = null;
+        }
     }
     
     updateGauges() {
@@ -890,6 +972,11 @@ class EliteDashboard {
         
         if (this.animations.particles) {
             this.animations.particles.rotation.y += 0.0005;
+        }
+        
+        // Update shader uniforms for post-processing
+        if (this.shaderPasses && this.shaderPasses.film) {
+            this.shaderPasses.film.uniforms.time.value = time;
         }
         
         this.updateGauges();
