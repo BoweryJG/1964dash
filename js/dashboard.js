@@ -424,16 +424,7 @@ class EliteDashboard {
         // Create ONE GIANT display exactly like RANK: 03 but RIGHT IN FRONT OF YOU
         const testGroup = new THREE.Group();
         
-        // Giant housing
-        const housingGeometry = new THREE.BoxGeometry(4, 1, 0.3);
-        const housingMaterial = new THREE.MeshPhysicalMaterial({
-            color: 0x1a1a1a,
-            metalness: 0.8,
-            roughness: 0.2
-        });
-        
-        const housing = new THREE.Mesh(housingGeometry, housingMaterial);
-        testGroup.add(housing);
+        // NO HOUSING - just the text display
         
         // Giant display background
         const displayGeometry = new THREE.PlaneGeometry(3.8, 0.8);
@@ -444,10 +435,10 @@ class EliteDashboard {
         });
         
         const display = new THREE.Mesh(displayGeometry, displayMaterial);
-        display.position.z = 0.16;
+        display.position.z = 0;
         testGroup.add(display);
         
-        // Giant text - EXACTLY like RANK: 03
+        // Giant text - EXACTLY like RANK: 03 but WAY IN FRONT
         const canvas = document.createElement('canvas');
         const context = canvas.getContext('2d');
         canvas.width = 512;
@@ -472,7 +463,7 @@ class EliteDashboard {
             new THREE.PlaneGeometry(3.6, 0.7),
             textMaterial
         );
-        textMesh.position.z = 0.17;
+        textMesh.position.z = 0.5;  // WAY in front of background
         testGroup.add(textMesh);
         
         // Position RIGHT IN FRONT OF CAMERA
@@ -492,16 +483,7 @@ class EliteDashboard {
         targets.forEach(target => {
             const targetGroup = new THREE.Group();
             
-            // MUCH LARGER Housing 
-            const housingGeometry = new THREE.BoxGeometry(2.4, 0.8, 0.3);
-            const housingMaterial = new THREE.MeshPhysicalMaterial({
-                color: 0x1a1a1a,
-                metalness: 0.8,
-                roughness: 0.2
-            });
-            
-            const housing = new THREE.Mesh(housingGeometry, housingMaterial);
-            targetGroup.add(housing);
+            // NO BLACK HOUSING - just display and text
             
             // MUCH LARGER Display background
             const displayGeometry = new THREE.PlaneGeometry(2.0, 0.6);
@@ -512,7 +494,7 @@ class EliteDashboard {
             });
             
             const display = new THREE.Mesh(displayGeometry, displayMaterial);
-            display.position.z = 0.16;
+            display.position.z = 0;
             targetGroup.add(display);
             
             // MUCH LARGER Text display
@@ -542,7 +524,7 @@ class EliteDashboard {
                 new THREE.PlaneGeometry(1.8, 0.5),
                 textMaterial
             );
-            textMesh.position.z = 0.17;
+            textMesh.position.z = 0.1;  // In front of background
             targetGroup.add(textMesh);
             
             targetGroup.position.set(target.pos[0], target.pos[1], target.pos[2]);
