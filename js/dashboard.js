@@ -344,27 +344,37 @@ class EliteDashboard {
     }
     
     createLighting() {
-        const ambientLight = new THREE.AmbientLight(0x404040, 0.3);
+        // Stronger ambient light for better gauge visibility
+        const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
         this.scene.add(ambientLight);
         
-        const keyLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        // Main key light
+        const keyLight = new THREE.DirectionalLight(0xffffff, 1.0);
         keyLight.position.set(5, 5, 5);
         keyLight.castShadow = true;
         keyLight.shadow.mapSize.width = 2048;
         keyLight.shadow.mapSize.height = 2048;
         this.scene.add(keyLight);
         
-        const rimLight = new THREE.DirectionalLight(0xD4AF37, 0.3);
+        // Rim light for definition
+        const rimLight = new THREE.DirectionalLight(0xD4AF37, 0.4);
         rimLight.position.set(-5, -2, -5);
         this.scene.add(rimLight);
         
-        const gaugeLight1 = new THREE.PointLight(0xD4AF37, 0.5, 10);
-        gaugeLight1.position.set(0, 0, 2);
+        // Front gauge illumination
+        const gaugeLight1 = new THREE.PointLight(0xD4AF37, 0.8, 15);
+        gaugeLight1.position.set(0, 2, 3);
         this.scene.add(gaugeLight1);
         
-        const gaugeLight2 = new THREE.PointLight(0xE5E5E5, 0.3, 8);
-        gaugeLight2.position.set(-3, 2, 1);
+        // Side gauge illumination
+        const gaugeLight2 = new THREE.PointLight(0xE5E5E5, 0.6, 12);
+        gaugeLight2.position.set(-3, 2, 2);
         this.scene.add(gaugeLight2);
+        
+        // Additional front light for gauge faces
+        const frontLight = new THREE.DirectionalLight(0xffffff, 0.5);
+        frontLight.position.set(0, 0, 10);
+        this.scene.add(frontLight);
     }
     
     createDashboardChassis() {
@@ -415,9 +425,10 @@ class EliteDashboard {
         
         const faceGeometry = new THREE.CylinderGeometry(1.8, 1.8, 0.05, 64);
         const faceMaterial = new THREE.MeshPhysicalMaterial({
-            color: 0x1a1a1a,
-            metalness: 0.1,
-            roughness: 0.8
+            color: 0x2a2a2a,
+            metalness: 0.3,
+            roughness: 0.6,
+            emissive: 0x111111
         });
         
         const face = new THREE.Mesh(faceGeometry, faceMaterial);
@@ -427,10 +438,8 @@ class EliteDashboard {
         for (let i = 0; i < 12; i++) {
             const angle = (i / 12) * Math.PI * 2;
             const markerGeometry = new THREE.BoxGeometry(0.02, 0.15, 0.02);
-            const markerMaterial = new THREE.MeshPhysicalMaterial({
-                color: 0xE5E5E5,
-                metalness: 0.8,
-                roughness: 0.2
+            const markerMaterial = new THREE.MeshBasicMaterial({
+                color: 0xD4AF37
             });
             
             const marker = new THREE.Mesh(markerGeometry, markerMaterial);
@@ -438,13 +447,42 @@ class EliteDashboard {
             marker.position.z = Math.sin(angle) * 1.6;
             marker.position.y = 0.05;
             chronometerGroup.add(marker);
+            
+            // Add numbers for key positions (12, 3, 6, 9)
+            if (i % 3 === 0) {
+                const number = i === 0 ? '100K' : i === 3 ? '25K' : i === 6 ? '50K' : '75K';
+                
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.width = 64;
+                canvas.height = 32;
+                
+                context.fillStyle = '#D4AF37';
+                context.font = 'bold 14px Arial';
+                context.textAlign = 'center';
+                context.fillText(number, 32, 20);
+                
+                const numberTexture = new THREE.CanvasTexture(canvas);
+                const numberMaterial = new THREE.MeshBasicMaterial({ 
+                    map: numberTexture,
+                    transparent: true 
+                });
+                
+                const numberMesh = new THREE.Mesh(
+                    new THREE.PlaneGeometry(0.3, 0.15),
+                    numberMaterial
+                );
+                numberMesh.position.x = Math.cos(angle) * 1.3;
+                numberMesh.position.z = Math.sin(angle) * 1.3;
+                numberMesh.position.y = 0.06;
+                numberMesh.rotation.x = -Math.PI / 2;
+                chronometerGroup.add(numberMesh);
+            }
         }
         
         const needleGeometry = new THREE.ConeGeometry(0.02, 1.4, 8);
-        const needleMaterial = new THREE.MeshPhysicalMaterial({
-            color: 0xD4AF37,
-            metalness: 0.9,
-            roughness: 0.1
+        const needleMaterial = new THREE.MeshBasicMaterial({
+            color: 0xff4444
         });
         
         const revenueNeedle = new THREE.Mesh(needleGeometry, needleMaterial);
@@ -593,9 +631,10 @@ class EliteDashboard {
         
         const faceGeometry = new THREE.CylinderGeometry(1.0, 1.0, 0.03, 32);
         const faceMaterial = new THREE.MeshPhysicalMaterial({
-            color: 0x0a0a0a,
-            metalness: 0.2,
-            roughness: 0.8
+            color: 0x2a2a2a,
+            metalness: 0.3,
+            roughness: 0.6,
+            emissive: 0x111111
         });
         
         const face = new THREE.Mesh(faceGeometry, faceMaterial);
