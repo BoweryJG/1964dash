@@ -420,6 +420,43 @@ class EliteDashboard {
         this.materials.chassis = { base: baseMaterial, bezel: bezelMaterial, leather: leatherMaterial };
     }
     
+    createDigitDisplay(text, basePos) {
+        // Create simple digit patterns using small white boxes
+        const boxes = [];
+        const boxSize = 0.02;
+        const spacing = 0.1;
+        
+        // Simple patterns for digits/letters
+        const patterns = {
+            '2': [[0,0],[1,0],[2,0],[2,1],[1,1],[0,1],[0,2],[1,2],[2,2]],
+            '5': [[0,0],[1,0],[2,0],[0,1],[1,1],[2,1],[2,2]],
+            'K': [[0,0],[0,1],[0,2],[1,1],[2,0],[2,2]],
+            '7': [[0,0],[1,0],[2,0],[2,1],[2,2]],
+            '0': [[0,0],[1,0],[2,0],[0,1],[2,1],[0,2],[1,2],[2,2]],
+            '1': [[1,0],[1,1],[1,2]]
+        };
+        
+        let charX = 0;
+        for (let char of text) {
+            const pattern = patterns[char] || [];
+            pattern.forEach(([x, y]) => {
+                const box = new THREE.Mesh(
+                    new THREE.BoxGeometry(boxSize, boxSize, boxSize),
+                    new THREE.MeshBasicMaterial({ color: 0xffffff })
+                );
+                box.position.set(
+                    basePos[0] + charX + (x * boxSize * 2) - 0.15,
+                    basePos[1] + (y * boxSize * 2) - 0.1,
+                    basePos[2] + 0.1
+                );
+                boxes.push(box);
+            });
+            charX += spacing;
+        }
+        
+        return boxes;
+    }
+    
     createPerformanceChronometer() {
         const chronometerGroup = new THREE.Group();
         
@@ -448,48 +485,16 @@ class EliteDashboard {
             marker.position.y = 0.05;
             chronometerGroup.add(marker);
             
-            // Add GIANT VISIBLE numbers using simple geometry
+            // Add SIMPLE BRIGHT RECTANGLES 
             if (i % 3 === 0) {
-                const number = i === 0 ? '100K' : i === 3 ? '25K' : i === 6 ? '50K' : '75K';
-                
-                // Create BIG BRIGHT RECTANGLES with numbers
                 const numberBg = new THREE.Mesh(
-                    new THREE.BoxGeometry(0.4, 0.2, 0.02),
+                    new THREE.BoxGeometry(0.4, 0.2, 0.1),
                     new THREE.MeshBasicMaterial({ color: 0xD4AF37 })
                 );
                 numberBg.position.x = Math.cos(angle) * 1.1;
                 numberBg.position.z = Math.sin(angle) * 1.1;
                 numberBg.position.y = 0.15;
                 chronometerGroup.add(numberBg);
-                
-                // Add text on top
-                const canvas = document.createElement('canvas');
-                const context = canvas.getContext('2d');
-                canvas.width = 256;
-                canvas.height = 128;
-                
-                context.fillStyle = '#000000';
-                context.fillRect(0, 0, canvas.width, canvas.height);
-                
-                context.fillStyle = '#FFFFFF';
-                context.font = 'bold 48px Arial';
-                context.textAlign = 'center';
-                context.textBaseline = 'middle';
-                context.fillText(number, 128, 64);
-                
-                const textTexture = new THREE.CanvasTexture(canvas);
-                const textMesh = new THREE.Mesh(
-                    new THREE.PlaneGeometry(0.35, 0.18),
-                    new THREE.MeshBasicMaterial({ 
-                        map: textTexture,
-                        transparent: false
-                    })
-                );
-                textMesh.position.x = Math.cos(angle) * 1.1;
-                textMesh.position.z = Math.sin(angle) * 1.1;
-                textMesh.position.y = 0.16;
-                textMesh.rotation.x = -Math.PI / 2;
-                chronometerGroup.add(textMesh);
             }
         }
         
@@ -514,70 +519,38 @@ class EliteDashboard {
         hub.position.y = 0.08;
         chronometerGroup.add(hub);
         
-        // Add MASSIVE VISIBLE TITLE
+        // Add SIMPLE TITLE BOX
         const titleBg = new THREE.Mesh(
             new THREE.BoxGeometry(3, 0.5, 0.1),
             new THREE.MeshBasicMaterial({ color: 0xff0000 })
         );
         titleBg.position.set(0, 0, 2.5);
         
-        const titleCanvas = document.createElement('canvas');
-        const titleContext = titleCanvas.getContext('2d');
-        titleCanvas.width = 512;
-        titleCanvas.height = 128;
-        
-        titleContext.fillStyle = '#000000';
-        titleContext.fillRect(0, 0, titleCanvas.width, titleCanvas.height);
-        
-        titleContext.fillStyle = '#FFFFFF';
-        titleContext.font = 'bold 48px Arial';
-        titleContext.textAlign = 'center';
-        titleContext.textBaseline = 'middle';
-        titleContext.fillText('REVENUE TARGET', 256, 64);
-        
-        const titleTexture = new THREE.CanvasTexture(titleCanvas);
-        const titleMesh = new THREE.Mesh(
-            new THREE.PlaneGeometry(2.8, 0.4),
-            new THREE.MeshBasicMaterial({ 
-                map: titleTexture,
-                transparent: false
-            })
-        );
-        titleMesh.position.set(0, 0, 2.6);
-        
         chronometerGroup.position.set(0, 0, 0);
-        // Add FLOATING NUMBERS that are impossible to miss
-        const floatingNumbers = ['25K', '50K', '75K', '100K'];
-        floatingNumbers.forEach((num, index) => {
-            const canvas = document.createElement('canvas');
-            const context = canvas.getContext('2d');
-            canvas.width = 256;
-            canvas.height = 256;
-            
-            context.fillStyle = '#FF0000';
-            context.fillRect(0, 0, canvas.width, canvas.height);
-            
-            context.fillStyle = '#FFFFFF';
-            context.font = 'bold 72px Arial';
-            context.textAlign = 'center';
-            context.textBaseline = 'middle';
-            context.fillText(num, 128, 128);
-            
-            const numTexture = new THREE.CanvasTexture(canvas);
-            const numMesh = new THREE.Mesh(
-                new THREE.PlaneGeometry(1, 1),
-                new THREE.MeshBasicMaterial({ 
-                    map: numTexture,
-                    transparent: false
-                })
+        // Create SIMPLE COLORED BOXES WITH NUMBERS - no canvas issues
+        const numbers = [
+            { text: '25K', color: 0x00ff00, pos: [-3, 3, 0] },
+            { text: '50K', color: 0x0000ff, pos: [-1, 3, 0] },
+            { text: '75K', color: 0xffff00, pos: [1, 3, 0] },
+            { text: '100K', color: 0xff00ff, pos: [3, 3, 0] }
+        ];
+        
+        numbers.forEach(num => {
+            // Create colored box
+            const box = new THREE.Mesh(
+                new THREE.BoxGeometry(0.8, 0.4, 0.1),
+                new THREE.MeshBasicMaterial({ color: num.color })
             );
-            numMesh.position.set((index - 1.5) * 2, 3, 0);
-            this.scene.add(numMesh);
+            box.position.set(num.pos[0], num.pos[1], num.pos[2]);
+            this.scene.add(box);
+            
+            // Create simple number display using multiple small boxes
+            const digitBoxes = this.createDigitDisplay(num.text, num.pos);
+            digitBoxes.forEach(digitBox => this.scene.add(digitBox));
         });
         
         this.scene.add(chronometerGroup);
         this.scene.add(titleBg);
-        this.scene.add(titleMesh);
         
         
         this.gauges.chronometer = {
