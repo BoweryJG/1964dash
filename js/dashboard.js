@@ -432,8 +432,8 @@ class EliteDashboard {
         targets.forEach(target => {
             const targetGroup = new THREE.Group();
             
-            // Housing (same as odometer)
-            const housingGeometry = new THREE.BoxGeometry(1.2, 0.4, 0.3);
+            // MUCH LARGER Housing 
+            const housingGeometry = new THREE.BoxGeometry(2.4, 0.8, 0.3);
             const housingMaterial = new THREE.MeshPhysicalMaterial({
                 color: 0x1a1a1a,
                 metalness: 0.8,
@@ -443,8 +443,8 @@ class EliteDashboard {
             const housing = new THREE.Mesh(housingGeometry, housingMaterial);
             targetGroup.add(housing);
             
-            // Display background (same as odometer)
-            const displayGeometry = new THREE.PlaneGeometry(1.0, 0.3);
+            // MUCH LARGER Display background
+            const displayGeometry = new THREE.PlaneGeometry(2.0, 0.6);
             const displayMaterial = new THREE.MeshBasicMaterial({
                 color: 0x001100,
                 transparent: true,
@@ -455,25 +455,31 @@ class EliteDashboard {
             display.position.z = 0.16;
             targetGroup.add(display);
             
-            // Text display (EXACT same method as RANK: 03)
+            // MUCH LARGER Text display
             const canvas = document.createElement('canvas');
             const context = canvas.getContext('2d');
-            canvas.width = 256;
-            canvas.height = 64;
+            canvas.width = 512;
+            canvas.height = 128;
             
+            // Clear background first
+            context.fillStyle = '#001100';
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // MASSIVE text
             context.fillStyle = target.color;
-            context.font = '24px Courier New';
+            context.font = 'bold 64px Courier New';
             context.textAlign = 'center';
-            context.fillText(target.text, 128, 40);
+            context.textBaseline = 'middle';
+            context.fillText(target.text, 256, 64);
             
             const textTexture = new THREE.CanvasTexture(canvas);
             const textMaterial = new THREE.MeshBasicMaterial({ 
                 map: textTexture,
-                transparent: true 
+                transparent: false
             });
             
             const textMesh = new THREE.Mesh(
-                new THREE.PlaneGeometry(0.8, 0.2),
+                new THREE.PlaneGeometry(1.8, 0.5),
                 textMaterial
             );
             textMesh.position.z = 0.17;
@@ -837,29 +843,28 @@ class EliteDashboard {
         ];
         
         starPositions.forEach((pos, index) => {
-            const starGeometry = new THREE.SphereGeometry(0.03, 8, 6);
+            // Make ALL stars bright and visible
+            const starGeometry = new THREE.SphereGeometry(0.08, 8, 6);
             const starMaterial = new THREE.MeshBasicMaterial({
-                color: index < this.performanceData.achievements ? 0xD4AF37 : 0x333333,
-                transparent: true,
-                opacity: index < this.performanceData.achievements ? 1.0 : 0.3
+                color: 0xD4AF37, // All gold
+                transparent: false
             });
             
             const star = new THREE.Mesh(starGeometry, starMaterial);
             star.position.set(pos.x, pos.y, pos.z);
             constellationGroup.add(star);
             
-            if (index < this.performanceData.achievements) {
-                const glowGeometry = new THREE.SphereGeometry(0.05, 8, 6);
-                const glowMaterial = new THREE.MeshBasicMaterial({
-                    color: 0xD4AF37,
-                    transparent: true,
-                    opacity: 0.3
-                });
-                
-                const glow = new THREE.Mesh(glowGeometry, glowMaterial);
-                glow.position.set(pos.x, pos.y, pos.z);
-                constellationGroup.add(glow);
-            }
+            // Add bright glow to all stars
+            const glowGeometry = new THREE.SphereGeometry(0.12, 8, 6);
+            const glowMaterial = new THREE.MeshBasicMaterial({
+                color: 0xD4AF37,
+                transparent: true,
+                opacity: 0.4
+            });
+            
+            const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+            glow.position.set(pos.x, pos.y, pos.z);
+            constellationGroup.add(glow);
         });
         
         this.scene.add(constellationGroup);
