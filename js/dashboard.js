@@ -1,3 +1,183 @@
+import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+import { FilmShader } from 'three/addons/shaders/FilmShader.js';
+import { VignetteShader } from 'three/addons/shaders/VignetteShader.js';
+
+class LuxuryMaterials {
+    constructor() {
+        this.materials = {};
+        this.textures = {};
+        this.init();
+    }
+    
+    init() {
+        this.createBrushedMetalMaterial();
+        this.createLeatherMaterial();
+        this.createCarbonFiberMaterial();
+        this.createCrystalMaterial();
+        this.createVintageDialMaterial();
+    }
+    
+    createBrushedMetalMaterial() {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 512;
+        canvas.height = 512;
+        
+        ctx.fillStyle = '#2a2a2a';
+        ctx.fillRect(0, 0, 512, 512);
+        
+        for (let i = 0; i < 200; i++) {
+            ctx.strokeStyle = `rgba(${120 + Math.random() * 40}, ${120 + Math.random() * 40}, ${120 + Math.random() * 40}, 0.1)`;
+            ctx.lineWidth = Math.random() * 2;
+            ctx.beginPath();
+            ctx.moveTo(0, Math.random() * 512);
+            ctx.lineTo(512, Math.random() * 512);
+            ctx.stroke();
+        }
+        
+        const brushedTexture = new THREE.CanvasTexture(canvas);
+        brushedTexture.wrapS = THREE.RepeatWrapping;
+        brushedTexture.wrapT = THREE.RepeatWrapping;
+        
+        this.materials.brushedMetal = new THREE.MeshPhysicalMaterial({
+            color: 0x404040,
+            metalness: 0.9,
+            roughness: 0.1,
+            map: brushedTexture,
+            envMapIntensity: 1.0
+        });
+        
+        this.textures.brushed = brushedTexture;
+    }
+    
+    createLeatherMaterial() {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 256;
+        canvas.height = 256;
+        
+        const gradient = ctx.createRadialGradient(128, 128, 0, 128, 128, 128);
+        gradient.addColorStop(0, '#8B4513');
+        gradient.addColorStop(0.5, '#654321');
+        gradient.addColorStop(1, '#4A2C0A');
+        
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 256, 256);
+        
+        for (let i = 0; i < 1000; i++) {
+            const x = Math.random() * 256;
+            const y = Math.random() * 256;
+            const size = Math.random() * 3;
+            
+            ctx.fillStyle = `rgba(0, 0, 0, ${Math.random() * 0.3})`;
+            ctx.beginPath();
+            ctx.arc(x, y, size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        const leatherTexture = new THREE.CanvasTexture(canvas);
+        
+        this.materials.leather = new THREE.MeshLambertMaterial({
+            color: 0x8B4513,
+            map: leatherTexture
+        });
+        
+        this.textures.leather = leatherTexture;
+    }
+    
+    createCarbonFiberMaterial() {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 128;
+        canvas.height = 128;
+        
+        ctx.fillStyle = '#1a1a1a';
+        ctx.fillRect(0, 0, 128, 128);
+        
+        for (let x = 0; x < 128; x += 8) {
+            for (let y = 0; y < 128; y += 8) {
+                if ((Math.floor(x / 8) + Math.floor(y / 8)) % 2) {
+                    ctx.fillStyle = '#333333';
+                    ctx.fillRect(x, y, 8, 8);
+                }
+            }
+        }
+        
+        const carbonTexture = new THREE.CanvasTexture(canvas);
+        carbonTexture.wrapS = THREE.RepeatWrapping;
+        carbonTexture.wrapT = THREE.RepeatWrapping;
+        
+        this.materials.carbonFiber = new THREE.MeshPhysicalMaterial({
+            color: 0x1a1a1a,
+            metalness: 0.1,
+            roughness: 0.3,
+            map: carbonTexture
+        });
+        
+        this.textures.carbon = carbonTexture;
+    }
+    
+    createCrystalMaterial() {
+        this.materials.crystal = new THREE.MeshPhysicalMaterial({
+            color: 0xffffff,
+            metalness: 0,
+            roughness: 0,
+            transparent: true,
+            opacity: 0.3,
+            transmission: 0.95,
+            thickness: 0.1,
+            ior: 1.5
+        });
+    }
+    
+    createVintageDialMaterial() {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 512;
+        canvas.height = 512;
+        
+        const gradient = ctx.createRadialGradient(256, 256, 0, 256, 256, 256);
+        gradient.addColorStop(0, '#FFF8DC');
+        gradient.addColorStop(0.8, '#F5F5DC');
+        gradient.addColorStop(1, '#E5E5E5');
+        
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 512, 512);
+        
+        for (let i = 0; i < 50; i++) {
+            const x = Math.random() * 512;
+            const y = Math.random() * 512;
+            const size = Math.random() * 20;
+            
+            ctx.fillStyle = `rgba(139, 69, 19, ${Math.random() * 0.05})`;
+            ctx.beginPath();
+            ctx.arc(x, y, size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        const dialTexture = new THREE.CanvasTexture(canvas);
+        
+        this.materials.vintageDial = new THREE.MeshLambertMaterial({
+            color: 0xFFF8DC,
+            map: dialTexture
+        });
+        
+        this.textures.dial = dialTexture;
+    }
+    
+    getMaterial(name) {
+        return this.materials[name] || this.materials.brushedMetal;
+    }
+    
+    getTexture(name) {
+        return this.textures[name];
+    }
+}
+
 class EliteDashboard {
     constructor() {
         this.scene = null;
@@ -5,6 +185,7 @@ class EliteDashboard {
         this.renderer = null;
         this.controls = null;
         this.composer = null;
+        this.luxuryMaterials = new LuxuryMaterials();
         
         this.gauges = {};
         this.animations = {};
@@ -46,10 +227,8 @@ class EliteDashboard {
     setupScene() {
         const canvas = document.getElementById('performance-canvas');
         
-        // Scene
         this.scene = new THREE.Scene();
         
-        // Camera with luxury FOV
         this.camera = new THREE.PerspectiveCamera(
             35, 
             window.innerWidth / window.innerHeight, 
@@ -58,7 +237,6 @@ class EliteDashboard {
         );
         this.camera.position.set(0, 0, 8);
         
-        // Renderer with premium settings
         this.renderer = new THREE.WebGLRenderer({ 
             canvas: canvas,
             antialias: true,
@@ -68,24 +246,20 @@ class EliteDashboard {
         this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        this.renderer.outputEncoding = THREE.sRGBEncoding;
+        this.renderer.outputColorSpace = THREE.SRGBColorSpace;
         this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
         this.renderer.toneMappingExposure = 1.2;
         
-        // Responsive handling
         window.addEventListener('resize', () => this.onWindowResize());
         
-        // Mobile orientation handling
         window.addEventListener('orientationchange', () => {
             setTimeout(() => this.onWindowResize(), 100);
         });
     }
     
     createSpaceBackground() {
-        // Deep space geometry
         const spaceGeometry = new THREE.SphereGeometry(500, 64, 32);
         
-        // Custom space shader
         const spaceShader = {
             uniforms: {
                 time: { value: 0 },
@@ -134,7 +308,6 @@ class EliteDashboard {
         
         this.materials.space = spaceMaterial;
         
-        // Floating particles
         this.createSpaceParticles();
     }
     
@@ -173,11 +346,9 @@ class EliteDashboard {
     }
     
     createLighting() {
-        // Ambient lighting for luxury feel
         const ambientLight = new THREE.AmbientLight(0x404040, 0.3);
         this.scene.add(ambientLight);
         
-        // Key light for metal reflections
         const keyLight = new THREE.DirectionalLight(0xffffff, 0.8);
         keyLight.position.set(5, 5, 5);
         keyLight.castShadow = true;
@@ -185,12 +356,10 @@ class EliteDashboard {
         keyLight.shadow.mapSize.height = 2048;
         this.scene.add(keyLight);
         
-        // Rim light for edge definition
         const rimLight = new THREE.DirectionalLight(0xD4AF37, 0.3);
         rimLight.position.set(-5, -2, -5);
         this.scene.add(rimLight);
         
-        // Point lights for gauge illumination
         const gaugeLight1 = new THREE.PointLight(0xD4AF37, 0.5, 10);
         gaugeLight1.position.set(0, 0, 2);
         this.scene.add(gaugeLight1);
@@ -203,7 +372,6 @@ class EliteDashboard {
     createDashboardChassis() {
         const chassisGroup = new THREE.Group();
         
-        // Main dashboard base
         const baseGeometry = new THREE.CylinderGeometry(3.5, 3.8, 0.3, 32);
         const baseMaterial = new THREE.MeshPhysicalMaterial({
             color: 0x2a2a2a,
@@ -217,7 +385,6 @@ class EliteDashboard {
         chassisBase.receiveShadow = true;
         chassisGroup.add(chassisBase);
         
-        // Luxury bezel
         const bezelGeometry = new THREE.TorusGeometry(3.2, 0.1, 16, 32);
         const bezelMaterial = new THREE.MeshPhysicalMaterial({
             color: 0xD4AF37,
@@ -229,7 +396,6 @@ class EliteDashboard {
         bezel.rotation.x = -Math.PI / 2;
         chassisGroup.add(bezel);
         
-        // Leather padding
         const leatherGeometry = new THREE.RingGeometry(2.8, 3.0, 32);
         const leatherMaterial = new THREE.MeshLambertMaterial({
             color: 0x8B4513,
@@ -249,7 +415,6 @@ class EliteDashboard {
     createPerformanceChronometer() {
         const chronometerGroup = new THREE.Group();
         
-        // Main dial face
         const faceGeometry = new THREE.CylinderGeometry(1.8, 1.8, 0.05, 64);
         const faceMaterial = new THREE.MeshPhysicalMaterial({
             color: 0x1a1a1a,
@@ -261,7 +426,6 @@ class EliteDashboard {
         face.rotation.x = -Math.PI / 2;
         chronometerGroup.add(face);
         
-        // Hour markers (quarterly targets)
         for (let i = 0; i < 12; i++) {
             const angle = (i / 12) * Math.PI * 2;
             const markerGeometry = new THREE.BoxGeometry(0.02, 0.15, 0.02);
@@ -278,7 +442,6 @@ class EliteDashboard {
             chronometerGroup.add(marker);
         }
         
-        // Revenue needle
         const needleGeometry = new THREE.ConeGeometry(0.02, 1.4, 8);
         const needleMaterial = new THREE.MeshPhysicalMaterial({
             color: 0xD4AF37,
@@ -291,7 +454,6 @@ class EliteDashboard {
         revenueNeedle.position.y = 0.1;
         chronometerGroup.add(revenueNeedle);
         
-        // Center hub
         const hubGeometry = new THREE.CylinderGeometry(0.1, 0.1, 0.05, 16);
         const hubMaterial = new THREE.MeshPhysicalMaterial({
             color: 0x333333,
@@ -317,7 +479,6 @@ class EliteDashboard {
     createGoalFuelGauge() {
         const fuelGroup = new THREE.Group();
         
-        // Gauge housing
         const housingGeometry = new THREE.CylinderGeometry(0.3, 0.25, 1.5, 16);
         const housingMaterial = new THREE.MeshPhysicalMaterial({
             color: 0x2a2a2a,
@@ -329,7 +490,6 @@ class EliteDashboard {
         housing.castShadow = true;
         fuelGroup.add(housing);
         
-        // Glass tube
         const glassGeometry = new THREE.CylinderGeometry(0.22, 0.18, 1.3, 16);
         const glassMaterial = new THREE.MeshPhysicalMaterial({
             color: 0xffffff,
@@ -343,7 +503,6 @@ class EliteDashboard {
         const glassShell = new THREE.Mesh(glassGeometry, glassMaterial);
         fuelGroup.add(glassShell);
         
-        // Fuel liquid
         const fuelGeometry = new THREE.CylinderGeometry(0.2, 0.16, 0.1, 16);
         const fuelMaterial = new THREE.MeshPhysicalMaterial({
             color: 0x00ff88,
@@ -373,7 +532,6 @@ class EliteDashboard {
     createLeaderboardOdometer() {
         const odometerGroup = new THREE.Group();
         
-        // Housing
         const housingGeometry = new THREE.BoxGeometry(1.2, 0.4, 0.3);
         const housingMaterial = new THREE.MeshPhysicalMaterial({
             color: 0x1a1a1a,
@@ -384,7 +542,6 @@ class EliteDashboard {
         const housing = new THREE.Mesh(housingGeometry, housingMaterial);
         odometerGroup.add(housing);
         
-        // Digital display background
         const displayGeometry = new THREE.PlaneGeometry(1.0, 0.3);
         const displayMaterial = new THREE.MeshBasicMaterial({
             color: 0x001100,
@@ -396,7 +553,6 @@ class EliteDashboard {
         display.position.z = 0.16;
         odometerGroup.add(display);
         
-        // Text display
         const canvas = document.createElement('canvas');
         const context = canvas.getContext('2d');
         canvas.width = 256;
@@ -437,7 +593,6 @@ class EliteDashboard {
     createPerformanceTachometer() {
         const tachoGroup = new THREE.Group();
         
-        // Tachometer face
         const faceGeometry = new THREE.CylinderGeometry(1.0, 1.0, 0.03, 32);
         const faceMaterial = new THREE.MeshPhysicalMaterial({
             color: 0x0a0a0a,
@@ -449,7 +604,6 @@ class EliteDashboard {
         face.rotation.x = -Math.PI / 2;
         tachoGroup.add(face);
         
-        // RPM markings
         for (let i = 0; i <= 10; i++) {
             const angle = (i / 10) * Math.PI - Math.PI / 2;
             const radius = 0.85;
@@ -466,7 +620,6 @@ class EliteDashboard {
             tachoGroup.add(mark);
         }
         
-        // Tachometer needle
         const needleGeometry = new THREE.ConeGeometry(0.015, 0.7, 6);
         const needleMaterial = new THREE.MeshPhysicalMaterial({
             color: 0xff4444,
@@ -494,7 +647,6 @@ class EliteDashboard {
     createAchievementConstellation() {
         const constellationGroup = new THREE.Group();
         
-        // Achievement stars
         const starPositions = [
             { x: 1.5, y: 2, z: -1 },
             { x: 2, y: 1.5, z: -1.2 },
@@ -541,7 +693,6 @@ class EliteDashboard {
     createPipelinePressureGauge() {
         const pressureGroup = new THREE.Group();
         
-        // Pressure gauge body
         const bodyGeometry = new THREE.CylinderGeometry(0.5, 0.5, 0.1, 16);
         const bodyMaterial = new THREE.MeshPhysicalMaterial({
             color: 0x2a2a2a,
@@ -553,7 +704,6 @@ class EliteDashboard {
         body.rotation.x = -Math.PI / 2;
         pressureGroup.add(body);
         
-        // Pressure dial
         const dialGeometry = new THREE.CylinderGeometry(0.4, 0.4, 0.02, 32);
         const dialMaterial = new THREE.MeshBasicMaterial({
             color: 0x000000
@@ -564,7 +714,6 @@ class EliteDashboard {
         dial.position.y = 0.03;
         pressureGroup.add(dial);
         
-        // Pressure indicator
         const indicatorGeometry = new THREE.ConeGeometry(0.02, 0.3, 6);
         const indicatorMaterial = new THREE.MeshBasicMaterial({
             color: 0x00ff88
@@ -600,21 +749,18 @@ class EliteDashboard {
             
             raycaster.setFromCamera(mouse, this.camera);
             
-            // Add haptic feedback for mobile
             if (navigator.vibrate) {
                 navigator.vibrate(10);
             }
         };
         
-        // Touch and mouse events
         window.addEventListener('touchstart', onTouch, { passive: false });
         window.addEventListener('mousedown', onTouch);
         
-        // Device orientation for parallax
         if (window.DeviceOrientationEvent) {
             window.addEventListener('deviceorientation', (event) => {
-                const gamma = event.gamma || 0; // Left to right
-                const beta = event.beta || 0;   // Front to back
+                const gamma = event.gamma || 0;
+                const beta = event.beta || 0;
                 
                 this.camera.position.x += (gamma * 0.001);
                 this.camera.position.y += (beta * 0.001);
@@ -623,44 +769,37 @@ class EliteDashboard {
     }
     
     setupPostProcessing() {
-        // Create effect composer for luxury post-processing
-        this.composer = new THREE.EffectComposer(this.renderer);
+        this.composer = new EffectComposer(this.renderer);
         
-        // Base render pass
-        const renderPass = new THREE.RenderPass(this.scene, this.camera);
+        const renderPass = new RenderPass(this.scene, this.camera);
         this.composer.addPass(renderPass);
         
-        // Bloom pass for luxury glow
-        const bloomPass = new THREE.UnrealBloomPass(
+        const bloomPass = new UnrealBloomPass(
             new THREE.Vector2(window.innerWidth, window.innerHeight),
-            0.5,  // strength
-            0.4,  // radius
-            0.85  // threshold
+            0.5,
+            0.4,
+            0.85
         );
         this.composer.addPass(bloomPass);
         
-        // Film grain for vintage luxury feel
-        const filmPass = new THREE.ShaderPass(THREE.FilmShader);
+        const filmPass = new ShaderPass(FilmShader);
         filmPass.uniforms.nIntensity.value = 0.15;
         filmPass.uniforms.sIntensity.value = 0.1;
         filmPass.uniforms.sCount.value = 512;
         filmPass.uniforms.grayscale.value = 0;
         this.composer.addPass(filmPass);
         
-        // Subtle vignette
-        const vignettePass = new THREE.ShaderPass(THREE.VignetteShader);
+        const vignettePass = new ShaderPass(VignetteShader);
         vignettePass.uniforms.offset.value = 0.5;
         vignettePass.uniforms.darkness.value = 0.8;
         this.composer.addPass(vignettePass);
         
-        // Make sure the final pass renders to screen
         vignettePass.renderToScreen = true;
     }
     
     updateGauges() {
         const time = Date.now() * 0.001;
         
-        // Update chronometer needle based on revenue
         if (this.gauges.chronometer) {
             const progress = this.performanceData.revenue / this.performanceData.target;
             const targetRotation = progress * Math.PI * 2 - Math.PI / 2;
@@ -671,7 +810,6 @@ class EliteDashboard {
             );
         }
         
-        // Update fuel gauge
         if (this.gauges.fuel) {
             const fuelLevel = this.performanceData.goalProgress / 100;
             const targetY = -0.6 + (fuelLevel * 1.0);
@@ -681,13 +819,11 @@ class EliteDashboard {
                 0.02
             );
             
-            // Color change based on level
             const color = fuelLevel > 0.7 ? 0x00ff88 : 
                          fuelLevel > 0.3 ? 0xffaa00 : 0xff4444;
             this.gauges.fuel.material.color.setHex(color);
         }
         
-        // Update tachometer
         if (this.gauges.tachometer) {
             const activity = this.performanceData.calls / 100;
             const targetRotation = activity * Math.PI - Math.PI / 2;
@@ -698,7 +834,6 @@ class EliteDashboard {
             );
         }
         
-        // Update pressure gauge
         if (this.gauges.pressure) {
             const pressure = this.performanceData.velocity / 100;
             const targetRotation = pressure * Math.PI - Math.PI / 2;
@@ -709,12 +844,10 @@ class EliteDashboard {
             );
         }
         
-        // Update ranking display
         if (this.gauges.odometer) {
             this.updateRankingDisplay();
         }
         
-        // Simulate data changes for demo
         this.simulateDataUpdates(time);
     }
     
@@ -735,13 +868,11 @@ class EliteDashboard {
     }
     
     simulateDataUpdates(time) {
-        // Simulate realistic performance fluctuations
         this.performanceData.revenue += Math.sin(time * 0.1) * 50;
         this.performanceData.conversion += Math.sin(time * 0.05) * 0.5;
         this.performanceData.calls = 40 + Math.sin(time * 0.08) * 15;
         this.performanceData.velocity = 70 + Math.sin(time * 0.03) * 10;
         
-        // Ensure realistic bounds
         this.performanceData.revenue = Math.max(70000, Math.min(95000, this.performanceData.revenue));
         this.performanceData.conversion = Math.max(20, Math.min(30, this.performanceData.conversion));
         this.performanceData.calls = Math.max(30, Math.min(60, this.performanceData.calls));
@@ -753,24 +884,19 @@ class EliteDashboard {
     animate() {
         const time = Date.now() * 0.001;
         
-        // Update space background
         if (this.materials.space) {
             this.materials.space.uniforms.time.value = time;
         }
         
-        // Rotate particles
         if (this.animations.particles) {
             this.animations.particles.rotation.y += 0.0005;
         }
         
-        // Update all gauges
         this.updateGauges();
         
-        // Subtle camera sway for luxury feel
         this.camera.position.x += Math.sin(time * 0.1) * 0.002;
         this.camera.position.y += Math.cos(time * 0.15) * 0.001;
         
-        // Use post-processing composer for final render
         if (this.composer) {
             this.composer.render();
         } else {
@@ -791,7 +917,6 @@ class EliteDashboard {
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         
-        // Update post-processing composer size
         if (this.composer) {
             this.composer.setSize(window.innerWidth, window.innerHeight);
         }
@@ -819,7 +944,6 @@ class EliteDashboard {
     }
 }
 
-// Initialize dashboard when page loads
 document.addEventListener('DOMContentLoaded', () => {
     new EliteDashboard();
 });
