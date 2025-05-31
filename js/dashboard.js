@@ -233,7 +233,7 @@ class EliteDashboard {
             0.1, 
             1000
         );
-        this.camera.position.set(0, 0, 8);
+        this.camera.position.set(0, 0, 5);
         
         this.renderer = new THREE.WebGLRenderer({ 
             canvas: canvas,
@@ -423,10 +423,10 @@ class EliteDashboard {
     createRevenueDisplays() {
         // Create displays exactly like RANK: 03 for each revenue target
         const targets = [
-            { text: '25K', pos: [-2, 1, 0], color: '#D4AF37' },
-            { text: '50K', pos: [0, 1, 0], color: '#D4AF37' },
-            { text: '75K', pos: [2, 1, 0], color: '#D4AF37' },
-            { text: '100K', pos: [0, -1, 0], color: '#ff4444' }
+            { text: '25K', pos: [-1.5, 0.5, 1], color: '#D4AF37' },
+            { text: '50K', pos: [1.5, 0.5, 1], color: '#D4AF37' },
+            { text: '75K', pos: [-1.5, -0.5, 1], color: '#D4AF37' },
+            { text: '100K', pos: [1.5, -0.5, 1], color: '#ff4444' }
         ];
         
         targets.forEach(target => {
