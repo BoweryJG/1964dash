@@ -206,32 +206,20 @@ class EliteDashboard {
     }
     
     init() {
-        console.log('Initializing dashboard...');
         this.setupScene();
-        console.log('Scene setup complete');
         this.createSpaceBackground();
-        console.log('Space background created');
         this.createLighting();
-        console.log('Lighting created');
         this.createDashboardChassis();
-        console.log('Dashboard chassis created');
         this.createPerformanceChronometer();
-        console.log('Chronometer created');
         this.createGoalFuelGauge();
-        console.log('Fuel gauge created');
         this.createLeaderboardOdometer();
-        console.log('Odometer created');
         this.createPerformanceTachometer();
-        console.log('Tachometer created');
         this.createAchievementConstellation();
-        console.log('Constellation created');
         this.createPipelinePressureGauge();
-        console.log('Pressure gauge created');
         this.setupInteractions();
         this.setupPostProcessing();
         this.startAnimationLoop();
         this.hideLoadingScreen();
-        console.log('Dashboard initialization complete');
     }
     
     setupScene() {
@@ -245,7 +233,7 @@ class EliteDashboard {
             0.1, 
             1000
         );
-        this.camera.position.set(0, 0, 6);
+        this.camera.position.set(0, 0, 8);
         
         this.renderer = new THREE.WebGLRenderer({ 
             canvas: canvas,
@@ -437,10 +425,10 @@ class EliteDashboard {
         
         const faceGeometry = new THREE.CylinderGeometry(1.8, 1.8, 0.05, 64);
         const faceMaterial = new THREE.MeshPhysicalMaterial({
-            color: 0x2a2a2a,
-            metalness: 0.3,
-            roughness: 0.6,
-            emissive: 0x111111
+            color: 0x404040,
+            metalness: 0.1,
+            roughness: 0.8,
+            emissive: 0x202020
         });
         
         const face = new THREE.Mesh(faceGeometry, faceMaterial);
@@ -516,12 +504,6 @@ class EliteDashboard {
         chronometerGroup.position.set(0, 0, 0);
         this.scene.add(chronometerGroup);
         
-        // Add a bright marker to help locate the chronometer
-        const markerGeometry = new THREE.SphereGeometry(0.1, 8, 8);
-        const markerMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-        const marker = new THREE.Mesh(markerGeometry, markerMaterial);
-        marker.position.set(0, 0.5, 0);
-        chronometerGroup.add(marker);
         
         this.gauges.chronometer = {
             group: chronometerGroup,
@@ -574,13 +556,6 @@ class EliteDashboard {
         fuelGroup.position.set(-2.5, 0, 0);
         fuelGroup.rotation.z = 0;
         
-        // Add fuel gauge marker
-        const fuelMarker = new THREE.Mesh(
-            new THREE.SphereGeometry(0.1, 8, 8),
-            new THREE.MeshBasicMaterial({ color: 0xff00ff })
-        );
-        fuelMarker.position.set(0, 1, 0);
-        fuelGroup.add(fuelMarker);
         
         this.scene.add(fuelGroup);
         
@@ -659,10 +634,10 @@ class EliteDashboard {
         
         const faceGeometry = new THREE.CylinderGeometry(1.0, 1.0, 0.03, 32);
         const faceMaterial = new THREE.MeshPhysicalMaterial({
-            color: 0x2a2a2a,
-            metalness: 0.3,
-            roughness: 0.6,
-            emissive: 0x111111
+            color: 0x404040,
+            metalness: 0.1,
+            roughness: 0.8,
+            emissive: 0x202020
         });
         
         const face = new THREE.Mesh(faceGeometry, faceMaterial);
@@ -700,13 +675,6 @@ class EliteDashboard {
         tachoGroup.position.set(-1.5, -2, 0);
         tachoGroup.rotation.y = 0;
         
-        // Add tachometer marker
-        const tachoMarker = new THREE.Mesh(
-            new THREE.SphereGeometry(0.1, 8, 8),
-            new THREE.MeshBasicMaterial({ color: 0x00ffff })
-        );
-        tachoMarker.position.set(0, 0.3, 0);
-        tachoGroup.add(tachoMarker);
         
         this.scene.add(tachoGroup);
         
