@@ -420,6 +420,66 @@ class EliteDashboard {
         this.materials.chassis = { base: baseMaterial, bezel: bezelMaterial, leather: leatherMaterial };
     }
     
+    createTestDisplay() {
+        // Create ONE GIANT display exactly like RANK: 03 but RIGHT IN FRONT OF YOU
+        const testGroup = new THREE.Group();
+        
+        // Giant housing
+        const housingGeometry = new THREE.BoxGeometry(4, 1, 0.3);
+        const housingMaterial = new THREE.MeshPhysicalMaterial({
+            color: 0x1a1a1a,
+            metalness: 0.8,
+            roughness: 0.2
+        });
+        
+        const housing = new THREE.Mesh(housingGeometry, housingMaterial);
+        testGroup.add(housing);
+        
+        // Giant display background
+        const displayGeometry = new THREE.PlaneGeometry(3.8, 0.8);
+        const displayMaterial = new THREE.MeshBasicMaterial({
+            color: 0x001100,
+            transparent: true,
+            opacity: 0.9
+        });
+        
+        const display = new THREE.Mesh(displayGeometry, displayMaterial);
+        display.position.z = 0.16;
+        testGroup.add(display);
+        
+        // Giant text - EXACTLY like RANK: 03
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.width = 512;
+        canvas.height = 128;
+        
+        context.fillStyle = '#001100';
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        
+        context.fillStyle = '#00ff00';
+        context.font = '48px Courier New';
+        context.textAlign = 'center';
+        context.textBaseline = 'middle';
+        context.fillText('TEST: 100K', 256, 64);
+        
+        const textTexture = new THREE.CanvasTexture(canvas);
+        const textMaterial = new THREE.MeshBasicMaterial({ 
+            map: textTexture,
+            transparent: true 
+        });
+        
+        const textMesh = new THREE.Mesh(
+            new THREE.PlaneGeometry(3.6, 0.7),
+            textMaterial
+        );
+        textMesh.position.z = 0.17;
+        testGroup.add(textMesh);
+        
+        // Position RIGHT IN FRONT OF CAMERA
+        testGroup.position.set(0, 0, 3);
+        this.scene.add(testGroup);
+    }
+    
     createRevenueDisplays() {
         // Create displays exactly like RANK: 03 for each revenue target
         const targets = [
@@ -614,6 +674,9 @@ class EliteDashboard {
         
         
         chronometerGroup.position.set(0, 0, 0);
+        // Create ONE GIANT TEST DISPLAY right in front of you
+        this.createTestDisplay();
+        
         // Create revenue displays in the EXACT same style as RANK: 03
         this.createRevenueDisplays();
         
