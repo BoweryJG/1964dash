@@ -209,8 +209,14 @@ class EliteDashboard {
         this.setupScene();
         this.createSpaceBackground();
         this.createLighting();
-        // ONLY create the odometer (that works) and revenue displays
+        // Create the core luxury dashboard elements
+        this.createDashboardChassis();
+        this.createPerformanceChronometer();
+        this.createGoalFuelGauge();
         this.createLeaderboardOdometer();
+        this.createPerformanceTachometer();
+        this.createAchievementConstellation();
+        this.createPipelinePressureGauge();
         this.createRevenueDisplays();
         this.setupInteractions();
         this.setupPostProcessing();
@@ -466,10 +472,10 @@ class EliteDashboard {
     createRevenueDisplays() {
         // Create displays exactly like RANK: 03 for each revenue target
         const targets = [
-            { text: '25K', pos: [-1.5, 0.5, 1], color: '#D4AF37' },
-            { text: '50K', pos: [1.5, 0.5, 1], color: '#D4AF37' },
-            { text: '75K', pos: [-1.5, -0.5, 1], color: '#D4AF37' },
-            { text: '100K', pos: [1.5, -0.5, 1], color: '#ff4444' }
+            { text: '25K', pos: [-3, 2, 1], color: '#D4AF37' },
+            { text: '50K', pos: [0, 3, 1], color: '#D4AF37' },
+            { text: '75K', pos: [3, 2, 1], color: '#D4AF37' },
+            { text: '100K', pos: [0, -3, 1], color: '#ff4444' }
         ];
         
         targets.forEach(target => {
