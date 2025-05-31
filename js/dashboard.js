@@ -206,20 +206,32 @@ class EliteDashboard {
     }
     
     init() {
+        console.log('Initializing dashboard...');
         this.setupScene();
+        console.log('Scene setup complete');
         this.createSpaceBackground();
+        console.log('Space background created');
         this.createLighting();
+        console.log('Lighting created');
         this.createDashboardChassis();
+        console.log('Dashboard chassis created');
         this.createPerformanceChronometer();
+        console.log('Chronometer created');
         this.createGoalFuelGauge();
+        console.log('Fuel gauge created');
         this.createLeaderboardOdometer();
+        console.log('Odometer created');
         this.createPerformanceTachometer();
+        console.log('Tachometer created');
         this.createAchievementConstellation();
+        console.log('Constellation created');
         this.createPipelinePressureGauge();
+        console.log('Pressure gauge created');
         this.setupInteractions();
         this.setupPostProcessing();
         this.startAnimationLoop();
         this.hideLoadingScreen();
+        console.log('Dashboard initialization complete');
     }
     
     setupScene() {
@@ -233,7 +245,7 @@ class EliteDashboard {
             0.1, 
             1000
         );
-        this.camera.position.set(0, 0, 8);
+        this.camera.position.set(0, 0, 6);
         
         this.renderer = new THREE.WebGLRenderer({ 
             canvas: canvas,
@@ -504,6 +516,13 @@ class EliteDashboard {
         chronometerGroup.position.set(0, 0, 0);
         this.scene.add(chronometerGroup);
         
+        // Add a bright marker to help locate the chronometer
+        const markerGeometry = new THREE.SphereGeometry(0.1, 8, 8);
+        const markerMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+        const marker = new THREE.Mesh(markerGeometry, markerMaterial);
+        marker.position.set(0, 0.5, 0);
+        chronometerGroup.add(marker);
+        
         this.gauges.chronometer = {
             group: chronometerGroup,
             needle: revenueNeedle,
@@ -552,8 +571,17 @@ class EliteDashboard {
         fuelLevel.position.y = -0.5;
         fuelGroup.add(fuelLevel);
         
-        fuelGroup.position.set(-2.5, 0, 0.5);
-        fuelGroup.rotation.z = Math.PI;
+        fuelGroup.position.set(-2.5, 0, 0);
+        fuelGroup.rotation.z = 0;
+        
+        // Add fuel gauge marker
+        const fuelMarker = new THREE.Mesh(
+            new THREE.SphereGeometry(0.1, 8, 8),
+            new THREE.MeshBasicMaterial({ color: 0xff00ff })
+        );
+        fuelMarker.position.set(0, 1, 0);
+        fuelGroup.add(fuelMarker);
+        
         this.scene.add(fuelGroup);
         
         this.gauges.fuel = {
@@ -612,8 +640,8 @@ class EliteDashboard {
         textMesh.position.z = 0.17;
         odometerGroup.add(textMesh);
         
-        odometerGroup.position.set(2.5, 1.5, 0);
-        odometerGroup.rotation.y = -0.3;
+        odometerGroup.position.set(2.5, 0, 0);
+        odometerGroup.rotation.y = 0;
         this.scene.add(odometerGroup);
         
         this.gauges.odometer = {
@@ -669,8 +697,17 @@ class EliteDashboard {
         tachoNeedle.position.y = 0.05;
         tachoGroup.add(tachoNeedle);
         
-        tachoGroup.position.set(-2, -1.5, 0);
-        tachoGroup.rotation.y = 0.3;
+        tachoGroup.position.set(-1.5, -2, 0);
+        tachoGroup.rotation.y = 0;
+        
+        // Add tachometer marker
+        const tachoMarker = new THREE.Mesh(
+            new THREE.SphereGeometry(0.1, 8, 8),
+            new THREE.MeshBasicMaterial({ color: 0x00ffff })
+        );
+        tachoMarker.position.set(0, 0.3, 0);
+        tachoGroup.add(tachoMarker);
+        
         this.scene.add(tachoGroup);
         
         this.gauges.tachometer = {
@@ -761,8 +798,8 @@ class EliteDashboard {
         indicator.position.y = 0.05;
         pressureGroup.add(indicator);
         
-        pressureGroup.position.set(2, -1.5, 0);
-        pressureGroup.rotation.y = -0.3;
+        pressureGroup.position.set(1.5, -2, 0);
+        pressureGroup.rotation.y = 0;
         this.scene.add(pressureGroup);
         
         this.gauges.pressure = {
