@@ -209,8 +209,7 @@ class EliteDashboard {
         this.setupScene();
         this.createSpaceBackground();
         this.createLighting();
-        // ONLY create the test display and odometer (the ones that work)
-        this.createTestDisplay();
+        // ONLY create the odometer (that works) and revenue displays
         this.createLeaderboardOdometer();
         this.createRevenueDisplays();
         this.setupInteractions();
@@ -476,10 +475,19 @@ class EliteDashboard {
         targets.forEach(target => {
             const targetGroup = new THREE.Group();
             
-            // NO BLACK HOUSING - just display and text
+            // Housing - EXACTLY like odometer
+            const housingGeometry = new THREE.BoxGeometry(1.2, 0.4, 0.3);
+            const housingMaterial = new THREE.MeshPhysicalMaterial({
+                color: 0x1a1a1a,
+                metalness: 0.8,
+                roughness: 0.2
+            });
             
-            // MUCH LARGER Display background
-            const displayGeometry = new THREE.PlaneGeometry(2.0, 0.6);
+            const housing = new THREE.Mesh(housingGeometry, housingMaterial);
+            targetGroup.add(housing);
+            
+            // Display background - EXACTLY like odometer
+            const displayGeometry = new THREE.PlaneGeometry(1.0, 0.3);
             const displayMaterial = new THREE.MeshBasicMaterial({
                 color: 0x001100,
                 transparent: true,
@@ -487,37 +495,31 @@ class EliteDashboard {
             });
             
             const display = new THREE.Mesh(displayGeometry, displayMaterial);
-            display.position.z = 0;
+            display.position.z = 0.16;
             targetGroup.add(display);
             
-            // MUCH LARGER Text display
+            // Text display - EXACTLY like odometer
             const canvas = document.createElement('canvas');
             const context = canvas.getContext('2d');
-            canvas.width = 512;
-            canvas.height = 128;
+            canvas.width = 256;
+            canvas.height = 64;
             
-            // Clear background first
-            context.fillStyle = '#001100';
-            context.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // MASSIVE text
             context.fillStyle = target.color;
-            context.font = 'bold 64px Courier New';
+            context.font = '24px Courier New';
             context.textAlign = 'center';
-            context.textBaseline = 'middle';
-            context.fillText(target.text, 256, 64);
+            context.fillText(target.text, 128, 40);
             
             const textTexture = new THREE.CanvasTexture(canvas);
             const textMaterial = new THREE.MeshBasicMaterial({ 
                 map: textTexture,
-                transparent: false
+                transparent: true 
             });
             
             const textMesh = new THREE.Mesh(
-                new THREE.PlaneGeometry(1.8, 0.5),
+                new THREE.PlaneGeometry(0.8, 0.2),
                 textMaterial
             );
-            textMesh.position.z = 0.1;  // In front of background
+            textMesh.position.z = 0.17;
             targetGroup.add(textMesh);
             
             targetGroup.position.set(target.pos[0], target.pos[1], target.pos[2]);
