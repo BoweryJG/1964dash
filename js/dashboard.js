@@ -606,12 +606,6 @@ class EliteDashboard {
         hub.position.y = 0.08;
         chronometerGroup.add(hub);
         
-        // Add SIMPLE TITLE BOX
-        const titleBg = new THREE.Mesh(
-            new THREE.BoxGeometry(3, 0.5, 0.1),
-            new THREE.MeshBasicMaterial({ color: 0xff0000 })
-        );
-        titleBg.position.set(0, 0, 2.5);
         
         chronometerGroup.position.set(0, 0, 0);
         // Create revenue displays in the EXACT same style as RANK: 03
@@ -621,7 +615,6 @@ class EliteDashboard {
         // this.createHTMLNumbers();
         
         this.scene.add(chronometerGroup);
-        this.scene.add(titleBg);
         
         
         this.gauges.chronometer = {
