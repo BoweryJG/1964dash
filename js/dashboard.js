@@ -448,45 +448,48 @@ class EliteDashboard {
             marker.position.y = 0.05;
             chronometerGroup.add(marker);
             
-            // Add numbers for key positions (12, 3, 6, 9)
+            // Add GIANT VISIBLE numbers using simple geometry
             if (i % 3 === 0) {
                 const number = i === 0 ? '100K' : i === 3 ? '25K' : i === 6 ? '50K' : '75K';
                 
+                // Create BIG BRIGHT RECTANGLES with numbers
+                const numberBg = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.4, 0.2, 0.02),
+                    new THREE.MeshBasicMaterial({ color: 0xD4AF37 })
+                );
+                numberBg.position.x = Math.cos(angle) * 1.1;
+                numberBg.position.z = Math.sin(angle) * 1.1;
+                numberBg.position.y = 0.15;
+                chronometerGroup.add(numberBg);
+                
+                // Add text on top
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d');
-                canvas.width = 128;
-                canvas.height = 64;
+                canvas.width = 256;
+                canvas.height = 128;
                 
-                // Clear canvas with transparent background
-                context.clearRect(0, 0, canvas.width, canvas.height);
-                
-                // Add background for visibility
-                context.fillStyle = 'rgba(0, 0, 0, 0.8)';
+                context.fillStyle = '#000000';
                 context.fillRect(0, 0, canvas.width, canvas.height);
                 
-                // Draw text
-                context.fillStyle = '#D4AF37';
-                context.font = 'bold 24px Arial';
+                context.fillStyle = '#FFFFFF';
+                context.font = 'bold 48px Arial';
                 context.textAlign = 'center';
                 context.textBaseline = 'middle';
-                context.fillText(number, 64, 32);
+                context.fillText(number, 128, 64);
                 
-                const numberTexture = new THREE.CanvasTexture(canvas);
-                const numberMaterial = new THREE.MeshBasicMaterial({ 
-                    map: numberTexture,
-                    transparent: true,
-                    side: THREE.DoubleSide
-                });
-                
-                const numberMesh = new THREE.Mesh(
-                    new THREE.PlaneGeometry(0.5, 0.25),
-                    numberMaterial
+                const textTexture = new THREE.CanvasTexture(canvas);
+                const textMesh = new THREE.Mesh(
+                    new THREE.PlaneGeometry(0.35, 0.18),
+                    new THREE.MeshBasicMaterial({ 
+                        map: textTexture,
+                        transparent: false
+                    })
                 );
-                numberMesh.position.x = Math.cos(angle) * 1.2;
-                numberMesh.position.z = Math.sin(angle) * 1.2;
-                numberMesh.position.y = 0.1;
-                numberMesh.rotation.x = -Math.PI / 2;
-                chronometerGroup.add(numberMesh);
+                textMesh.position.x = Math.cos(angle) * 1.1;
+                textMesh.position.z = Math.sin(angle) * 1.1;
+                textMesh.position.y = 0.16;
+                textMesh.rotation.x = -Math.PI / 2;
+                chronometerGroup.add(textMesh);
             }
         }
         
@@ -511,37 +514,69 @@ class EliteDashboard {
         hub.position.y = 0.08;
         chronometerGroup.add(hub);
         
-        // Add a simple title label above the chronometer
+        // Add MASSIVE VISIBLE TITLE
+        const titleBg = new THREE.Mesh(
+            new THREE.BoxGeometry(3, 0.5, 0.1),
+            new THREE.MeshBasicMaterial({ color: 0xff0000 })
+        );
+        titleBg.position.set(0, 0, 2.5);
+        
         const titleCanvas = document.createElement('canvas');
         const titleContext = titleCanvas.getContext('2d');
-        titleCanvas.width = 256;
-        titleCanvas.height = 64;
+        titleCanvas.width = 512;
+        titleCanvas.height = 128;
         
-        titleContext.fillStyle = 'rgba(0, 0, 0, 0.9)';
+        titleContext.fillStyle = '#000000';
         titleContext.fillRect(0, 0, titleCanvas.width, titleCanvas.height);
         
-        titleContext.fillStyle = '#D4AF37';
-        titleContext.font = 'bold 20px Arial';
+        titleContext.fillStyle = '#FFFFFF';
+        titleContext.font = 'bold 48px Arial';
         titleContext.textAlign = 'center';
         titleContext.textBaseline = 'middle';
-        titleContext.fillText('REVENUE TARGET', 128, 32);
+        titleContext.fillText('REVENUE TARGET', 256, 64);
         
         const titleTexture = new THREE.CanvasTexture(titleCanvas);
-        const titleMaterial = new THREE.MeshBasicMaterial({ 
-            map: titleTexture,
-            transparent: true,
-            side: THREE.DoubleSide
-        });
-        
         const titleMesh = new THREE.Mesh(
-            new THREE.PlaneGeometry(1.5, 0.3),
-            titleMaterial
+            new THREE.PlaneGeometry(2.8, 0.4),
+            new THREE.MeshBasicMaterial({ 
+                map: titleTexture,
+                transparent: false
+            })
         );
-        titleMesh.position.set(0, 2.5, 0);
-        titleMesh.rotation.x = -Math.PI / 2;
+        titleMesh.position.set(0, 0, 2.6);
         
         chronometerGroup.position.set(0, 0, 0);
+        // Add FLOATING NUMBERS that are impossible to miss
+        const floatingNumbers = ['25K', '50K', '75K', '100K'];
+        floatingNumbers.forEach((num, index) => {
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.width = 256;
+            canvas.height = 256;
+            
+            context.fillStyle = '#FF0000';
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            
+            context.fillStyle = '#FFFFFF';
+            context.font = 'bold 72px Arial';
+            context.textAlign = 'center';
+            context.textBaseline = 'middle';
+            context.fillText(num, 128, 128);
+            
+            const numTexture = new THREE.CanvasTexture(canvas);
+            const numMesh = new THREE.Mesh(
+                new THREE.PlaneGeometry(1, 1),
+                new THREE.MeshBasicMaterial({ 
+                    map: numTexture,
+                    transparent: false
+                })
+            );
+            numMesh.position.set((index - 1.5) * 2, 3, 0);
+            this.scene.add(numMesh);
+        });
+        
         this.scene.add(chronometerGroup);
+        this.scene.add(titleBg);
         this.scene.add(titleMesh);
         
         
