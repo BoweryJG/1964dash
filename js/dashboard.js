@@ -420,6 +420,29 @@ class EliteDashboard {
         this.materials.chassis = { base: baseMaterial, bezel: bezelMaterial, leather: leatherMaterial };
     }
     
+    createHTMLNumbers() {
+        // Create HTML overlay numbers that are DEFINITELY visible
+        const overlay = document.createElement('div');
+        overlay.style.position = 'fixed';
+        overlay.style.top = '50px';
+        overlay.style.left = '50%';
+        overlay.style.transform = 'translateX(-50%)';
+        overlay.style.zIndex = '1000';
+        overlay.style.pointerEvents = 'none';
+        overlay.innerHTML = `
+            <div style="display: flex; gap: 20px; font-family: Arial; font-weight: bold;">
+                <div style="background: red; color: white; padding: 20px; font-size: 48px; border: 5px solid white;">25K</div>
+                <div style="background: blue; color: white; padding: 20px; font-size: 48px; border: 5px solid white;">50K</div>
+                <div style="background: green; color: white; padding: 20px; font-size: 48px; border: 5px solid white;">75K</div>
+                <div style="background: purple; color: white; padding: 20px; font-size: 48px; border: 5px solid white;">100K</div>
+            </div>
+            <div style="background: black; color: yellow; padding: 15px; font-size: 36px; text-align: center; margin-top: 20px; border: 3px solid yellow;">
+                REVENUE TARGETS
+            </div>
+        `;
+        document.body.appendChild(overlay);
+    }
+    
     createDigitDisplay(text, basePos) {
         // Create simple digit patterns using small white boxes
         const boxes = [];
@@ -527,26 +550,25 @@ class EliteDashboard {
         titleBg.position.set(0, 0, 2.5);
         
         chronometerGroup.position.set(0, 0, 0);
-        // Create SIMPLE COLORED BOXES WITH NUMBERS - no canvas issues
-        const numbers = [
-            { text: '25K', color: 0x00ff00, pos: [-3, 3, 0] },
-            { text: '50K', color: 0x0000ff, pos: [-1, 3, 0] },
-            { text: '75K', color: 0xffff00, pos: [1, 3, 0] },
-            { text: '100K', color: 0xff00ff, pos: [3, 3, 0] }
+        // CREATE MASSIVE NUMBERS WITH DOM ELEMENTS THAT DEFINITELY WORK
+        this.createHTMLNumbers();
+        
+        // Also add GIANT CUBES that are impossible to miss
+        const giantCubes = [
+            { color: 0xff0000, pos: [-4, 2, 0] }, // RED
+            { color: 0x00ff00, pos: [-2, 2, 0] }, // GREEN  
+            { color: 0x0000ff, pos: [0, 2, 0] },  // BLUE
+            { color: 0xffff00, pos: [2, 2, 0] },  // YELLOW
+            { color: 0xff00ff, pos: [4, 2, 0] }   // MAGENTA
         ];
         
-        numbers.forEach(num => {
-            // Create colored box
-            const box = new THREE.Mesh(
-                new THREE.BoxGeometry(0.8, 0.4, 0.1),
-                new THREE.MeshBasicMaterial({ color: num.color })
+        giantCubes.forEach(cube => {
+            const mesh = new THREE.Mesh(
+                new THREE.BoxGeometry(1, 1, 1),
+                new THREE.MeshBasicMaterial({ color: cube.color })
             );
-            box.position.set(num.pos[0], num.pos[1], num.pos[2]);
-            this.scene.add(box);
-            
-            // Create simple number display using multiple small boxes
-            const digitBoxes = this.createDigitDisplay(num.text, num.pos);
-            digitBoxes.forEach(digitBox => this.scene.add(digitBox));
+            mesh.position.set(cube.pos[0], cube.pos[1], cube.pos[2]);
+            this.scene.add(mesh);
         });
         
         this.scene.add(chronometerGroup);
