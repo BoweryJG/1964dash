@@ -209,13 +209,10 @@ class EliteDashboard {
         this.setupScene();
         this.createSpaceBackground();
         this.createLighting();
-        this.createDashboardChassis();
-        this.createPerformanceChronometer();
-        this.createGoalFuelGauge();
+        // ONLY create the test display and odometer (the ones that work)
+        this.createTestDisplay();
         this.createLeaderboardOdometer();
-        this.createPerformanceTachometer();
-        this.createAchievementConstellation();
-        this.createPipelinePressureGauge();
+        this.createRevenueDisplays();
         this.setupInteractions();
         this.setupPostProcessing();
         this.startAnimationLoop();
@@ -426,8 +423,8 @@ class EliteDashboard {
         
         // NO HOUSING - just the text display
         
-        // Giant display background
-        const displayGeometry = new THREE.PlaneGeometry(3.8, 0.8);
+        // Proper sized display background - same as RANK: 03
+        const displayGeometry = new THREE.PlaneGeometry(1.0, 0.3);
         const displayMaterial = new THREE.MeshBasicMaterial({
             color: 0x001100,
             transparent: true,
@@ -438,20 +435,16 @@ class EliteDashboard {
         display.position.z = 0;
         testGroup.add(display);
         
-        // Giant text - EXACTLY like RANK: 03 but WAY IN FRONT
+        // Text - EXACTLY like RANK: 03
         const canvas = document.createElement('canvas');
         const context = canvas.getContext('2d');
-        canvas.width = 512;
-        canvas.height = 128;
-        
-        context.fillStyle = '#001100';
-        context.fillRect(0, 0, canvas.width, canvas.height);
+        canvas.width = 256;
+        canvas.height = 64;
         
         context.fillStyle = '#00ff00';
-        context.font = '48px Courier New';
+        context.font = '24px Courier New';
         context.textAlign = 'center';
-        context.textBaseline = 'middle';
-        context.fillText('TEST: 100K', 256, 64);
+        context.fillText('100K', 128, 40);
         
         const textTexture = new THREE.CanvasTexture(canvas);
         const textMaterial = new THREE.MeshBasicMaterial({ 
@@ -460,14 +453,14 @@ class EliteDashboard {
         });
         
         const textMesh = new THREE.Mesh(
-            new THREE.PlaneGeometry(3.6, 0.7),
+            new THREE.PlaneGeometry(0.8, 0.2),
             textMaterial
         );
-        textMesh.position.z = 0.5;  // WAY in front of background
+        textMesh.position.z = 0.01;
         testGroup.add(textMesh);
         
-        // Position RIGHT IN FRONT OF CAMERA
-        testGroup.position.set(0, 0, 3);
+        // Position above the dashboard, not in front of camera
+        testGroup.position.set(0, 2, 0);
         this.scene.add(testGroup);
     }
     
