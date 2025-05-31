@@ -454,27 +454,37 @@ class EliteDashboard {
                 
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d');
-                canvas.width = 64;
-                canvas.height = 32;
+                canvas.width = 128;
+                canvas.height = 64;
                 
+                // Clear canvas with transparent background
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Add background for visibility
+                context.fillStyle = 'rgba(0, 0, 0, 0.8)';
+                context.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Draw text
                 context.fillStyle = '#D4AF37';
-                context.font = 'bold 14px Arial';
+                context.font = 'bold 24px Arial';
                 context.textAlign = 'center';
-                context.fillText(number, 32, 20);
+                context.textBaseline = 'middle';
+                context.fillText(number, 64, 32);
                 
                 const numberTexture = new THREE.CanvasTexture(canvas);
                 const numberMaterial = new THREE.MeshBasicMaterial({ 
                     map: numberTexture,
-                    transparent: true 
+                    transparent: true,
+                    side: THREE.DoubleSide
                 });
                 
                 const numberMesh = new THREE.Mesh(
-                    new THREE.PlaneGeometry(0.3, 0.15),
+                    new THREE.PlaneGeometry(0.5, 0.25),
                     numberMaterial
                 );
-                numberMesh.position.x = Math.cos(angle) * 1.3;
-                numberMesh.position.z = Math.sin(angle) * 1.3;
-                numberMesh.position.y = 0.06;
+                numberMesh.position.x = Math.cos(angle) * 1.2;
+                numberMesh.position.z = Math.sin(angle) * 1.2;
+                numberMesh.position.y = 0.1;
                 numberMesh.rotation.x = -Math.PI / 2;
                 chronometerGroup.add(numberMesh);
             }
@@ -501,8 +511,38 @@ class EliteDashboard {
         hub.position.y = 0.08;
         chronometerGroup.add(hub);
         
+        // Add a simple title label above the chronometer
+        const titleCanvas = document.createElement('canvas');
+        const titleContext = titleCanvas.getContext('2d');
+        titleCanvas.width = 256;
+        titleCanvas.height = 64;
+        
+        titleContext.fillStyle = 'rgba(0, 0, 0, 0.9)';
+        titleContext.fillRect(0, 0, titleCanvas.width, titleCanvas.height);
+        
+        titleContext.fillStyle = '#D4AF37';
+        titleContext.font = 'bold 20px Arial';
+        titleContext.textAlign = 'center';
+        titleContext.textBaseline = 'middle';
+        titleContext.fillText('REVENUE TARGET', 128, 32);
+        
+        const titleTexture = new THREE.CanvasTexture(titleCanvas);
+        const titleMaterial = new THREE.MeshBasicMaterial({ 
+            map: titleTexture,
+            transparent: true,
+            side: THREE.DoubleSide
+        });
+        
+        const titleMesh = new THREE.Mesh(
+            new THREE.PlaneGeometry(1.5, 0.3),
+            titleMaterial
+        );
+        titleMesh.position.set(0, 2.5, 0);
+        titleMesh.rotation.x = -Math.PI / 2;
+        
         chronometerGroup.position.set(0, 0, 0);
         this.scene.add(chronometerGroup);
+        this.scene.add(titleMesh);
         
         
         this.gauges.chronometer = {
@@ -557,7 +597,34 @@ class EliteDashboard {
         fuelGroup.rotation.z = 0;
         
         
+        // Add fuel gauge label
+        const fuelLabelCanvas = document.createElement('canvas');
+        const fuelLabelContext = fuelLabelCanvas.getContext('2d');
+        fuelLabelCanvas.width = 128;
+        fuelLabelCanvas.height = 32;
+        
+        fuelLabelContext.fillStyle = 'rgba(0, 0, 0, 0.9)';
+        fuelLabelContext.fillRect(0, 0, fuelLabelCanvas.width, fuelLabelCanvas.height);
+        
+        fuelLabelContext.fillStyle = '#00ff88';
+        fuelLabelContext.font = 'bold 16px Arial';
+        fuelLabelContext.textAlign = 'center';
+        fuelLabelContext.fillText('GOAL FUEL', 64, 20);
+        
+        const fuelLabelTexture = new THREE.CanvasTexture(fuelLabelCanvas);
+        const fuelLabelMesh = new THREE.Mesh(
+            new THREE.PlaneGeometry(0.8, 0.2),
+            new THREE.MeshBasicMaterial({ 
+                map: fuelLabelTexture,
+                transparent: true,
+                side: THREE.DoubleSide
+            })
+        );
+        fuelLabelMesh.position.set(-2.5, 1.2, 0);
+        fuelLabelMesh.rotation.x = -Math.PI / 2;
+        
         this.scene.add(fuelGroup);
+        this.scene.add(fuelLabelMesh);
         
         this.gauges.fuel = {
             group: fuelGroup,
